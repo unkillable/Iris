@@ -1,0 +1,1 @@
+access_list = ['Luga', 'niggerbread', 'widd', 'Grimz', 'Nombix', 'Jamie', 'trippy', 'john']
