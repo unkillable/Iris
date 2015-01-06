@@ -39,7 +39,7 @@ thread.start_new_thread(floodFilter,())
 
 def Net():
 	#Bot Configuration
-	nick = 'Iris'
+	nick = 'Iris_'
 	host = "irc.tm"
 	channel = "#mootsinsuits"
 	packets = ["NICK %s" % nick + "\r\n", "USER " + nick + " " + nick + " " + nick + " :" + nick + "\r\n", "JOIN %s" % channel + "\r\n"]

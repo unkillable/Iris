@@ -8,7 +8,7 @@ import threading
 import json
 from datetime import datetime
 from access import access_list
-
+from bs4 import BeautifulSoup
 #Skype API
 class SkypeResolver(threading.Thread):
 	
@@ -20,6 +20,10 @@ class SkypeResolver(threading.Thread):
                 try:
 						reponse = urllib2.urlopen("http://network-resolver.fr/bypass/apibypass.php?key=free&pseudo="+user).read()
 						q = reponse.split("\n")[0]
+						if "seconde." in q:
+							q = q.replace("seconde.", "senconds")
+						if "Nous" in q:
+							q = q.replace(q, "Could not find ip of " + user)
 						return q
                 except(ValueError, IndexError):
 					pass
@@ -78,14 +82,12 @@ def deleteTweet(s, name, msgid, channel):
 			s.send('PRIVMSG ' + channel + ' :Python error:' + str(e) + '\r\n')
 			
 def news(s, channel):
-	url = "http://us.cnn.com"
-	request = urllib2.Request(url)
-	reponse = urllib2.urlopen(request).read()
-	heads = re.findall('<h1>(.*)</h1>', reponse)
-	print heads
-	QP1 = heads[0].split(">", 1)[1][:-4].replace("<br>", "")
-	QP2 = heads[1].split(">", 1)[1][:-4].replace("<br>", "")
-	s.send('PRIVMSG ' + channel + ' :Top headline - ' + str(QP1) + ", "+str(QP2)+ '\r\n')
+	problem_url  = "http://www.nydailynews.com/"
+	problem_page = urllib2.urlopen(problem_url)
+	soup = BeautifulSoup(problem_page.read())
+	problem_text = soup.find("h2").text
+	print problem_text.strip()
+	s.send('PRIVMSG ' + channel + ' :Top headline - ' + problem_text.strip().encode('utf8')+ '\r\n')
 
 def pingIp(s, site, channel):
 	t = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",site)
