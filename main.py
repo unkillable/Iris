@@ -39,7 +39,7 @@ thread.start_new_thread(floodFilter,())
 
 def Net():
 	#Bot Configuration
-	nick = 'Iris_'
+	nick = 'Iris'
 	host = "irc.tm"
 	channel = "#mootsinsuits"
 	packets = ["NICK %s" % nick + "\r\n", "USER " + nick + " " + nick + " " + nick + " :" + nick + "\r\n", "JOIN %s" % channel + "\r\n"]
@@ -52,7 +52,7 @@ def Net():
 		s.send(packet);
 	cmds = {}
 	while True:
-		data = s.recv(1024);
+		data = s.recv(1024)
 		data = data.strip();
 		print data
 		if data.find(" 376 ") != -1:
@@ -131,7 +131,7 @@ def Net():
 						name = data.split('.access ')[1]
 						access(s, name, channel, data)
 				else:
-					send(s, 'PRIVMSG %s :How about you go suck on a big fat chode\r\n' %s (channel))
+					send(s, 'PRIVMSG %s :How about you go suck on a big fat chode\r\n' % (channel))
 			
 			if sData.startswith("!tweet "):
 				name = user(data)
@@ -159,8 +159,18 @@ def Net():
 					tweeted = 1
 					
 			if sData.startswith("!geoip "):
-				ip = data.split('!geoip ')[1]
-				geoIP(s, ip, channel)	
+				try:
+					ip = data.split('!geoip ')[1]
+					geoIP(s, ip, channel)		
+				except Exception as e:
+					pass
+				
+			if sData.startswith("!geo "):
+				try:
+					ip = data.split('!geo ')[1]
+					geoIP(s, ip, channel)		
+				except Exception as e:
+					pass
 				
 			if sData.startswith("!news"):
 				news(s, channel)
@@ -219,5 +229,11 @@ def Net():
 				except Exception as e:
 					send(s, 'PRIVMSG ' + channel + ' :%s\r\n' % str(e))  
 					pass       
-				
-Net()	
+			if sData.startswith("!rotate"):
+				send(s, "QUIT Rotating tor nodes\r\n")
+				s.close()
+				NewTorIP()
+				time.sleep(5)
+				print "Dong dong"
+				os.execv(__file__, sys.argv)
+Net()

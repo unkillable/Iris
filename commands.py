@@ -9,6 +9,8 @@ import json
 from datetime import datetime
 from access import access_list
 from bs4 import BeautifulSoup
+from stem import Signal
+from stem.control import Controller
 #Skype API
 class SkypeResolver(threading.Thread):
 	
@@ -18,12 +20,8 @@ class SkypeResolver(threading.Thread):
 						"skypeName": user
                 }
                 try:
-						reponse = urllib2.urlopen("http://network-resolver.fr/bypass/apibypass.php?key=free&pseudo="+user).read()
+						reponse = urllib2.urlopen("http://strikeread.ml/api/apiskyper.php?username="+user).read()
 						q = reponse.split("\n")[0]
-						if "seconde." in q:
-							q = q.replace("seconde.", "senconds")
-						if "Nous" in q:
-							q = q.replace(q, "Could not find ip of " + user)
 						return q
                 except(ValueError, IndexError):
 					pass
@@ -184,3 +182,8 @@ def whois(s, name):
 		return True
 	else:
 		return False
+
+def NewTorIP():
+	with Controller.from_port(port = 9051) as controller:
+		controller.authenticate()
+		controller.signal(Signal.NEWNYM)
