@@ -11,6 +11,8 @@ import time
 import threading
 import re
 import commands
+import os
+import sys
 from bs4 import BeautifulSoup
 from commands import *
 
@@ -228,12 +230,16 @@ def Net():
 					send(s, 'PRIVMSG %s :%s - %s\r\n' % (channel, site, title))
 				except Exception as e:
 					send(s, 'PRIVMSG ' + channel + ' :%s\r\n' % str(e))  
-					pass       
+					pass
 			if sData.startswith("!rotate"):
-				send(s, "QUIT Rotating tor nodes\r\n")
-				s.close()
-				NewTorIP()
-				time.sleep(5)
-				print "Dong dong"
-				os.execv(__file__, sys.argv)
+				name = user(data)
+				yn = whois(s, name)
+				if yn == True:
+					if data.startswith(":Luga!") or data.startswith(":niggerbread!"):
+						send(s, "PRIVMSG %s Rotating tor nodes\r\n" % (channel))
+						send(s, "QUIT\r\n")
+						s.close()
+						os.system("sudo python rotate.py")
+						time.sleep(5)
+						os.system("sudo torify python main.py")
 Net()
