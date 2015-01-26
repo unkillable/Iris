@@ -11,6 +11,7 @@ from access import access_list
 from bs4 import BeautifulSoup
 from stem import Signal
 from stem.control import Controller
+
 #Skype API
 class SkypeResolver(threading.Thread):
 	
@@ -165,6 +166,46 @@ def geoIP(s, ip, channel):
 	except(ValueError, IndexError):
 		s.send('PRIVMSG %s : Could not get IP information\r\n' % (channel))
 		pass
+
+
+#Reddit config		
+global reddit_topics
+reddit_topics = []
+global rCounter #Stores the number of which topic you are on
+rRounter = 0
+def reddit(s, channel, *args):
+	if len(args) > 0:
+			url = "http://reddit.com/r/"+args[0]
+	else:
+		url = "http://reddit.com"
+	page = urllib2.Request(url, headers={ 'User-Agent' : 'Iris by /u/Iris' })
+	page = urllib2.urlopen(page)
+	results = BeautifulSoup(page.read())
+	posts = results.find_all("div", {"class":"entry unvoted"})
+	print posts
+	global reddit_topics
+	reddit_topics = []
+	reddit_topics = posts
+	global rCounter
+	rCounter = 0
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, str(reddit_topics[0].a.contents[0]).encode("ascii")))
+	if str(reddit_topics[0].a['href']).encode("ascii").startswith("/r/"):
+		send(s, "PRIVMSG %s :%s\r\n" % (channel, "http://reddit.com"+str(reddit_topics[0].a['href']).encode("ascii")))
+	else:
+		send(s, "PRIVMSG %s :%s\r\n" % (channel, str(reddit_topics[0].a['href']).encode("ascii"))) 
+	
+def reddit_next(s, channel):
+	if "rCounter" in globals():
+		global rCounter
+		rCounter += 1
+		global reddit_topics
+		send(s, "PRIVMSG %s :%s\r\n" % (channel, str(reddit_topics[rCounter].a.contents[0]).encode("ascii")))
+		if str(reddit_topics[0].a['href']).encode("ascii").startswith("/r/"):
+			send(s, "PRIVMSG %s :%s\r\n" % (channel, "http://reddit.com"+str(reddit_topics[rCounter].a['href']).encode("ascii")))
+		else:
+			send(s, "PRIVMSG %s :%s\r\n" % (channel, str(reddit_topics[rCounter].a['href']).encode("ascii"))) 
+	else:
+		send(s, "PRIVMSG %s :Please pick a topic first using !reddit <topic>\r\n" % (channel))
 #Tools
 def __datetime(date_str):
 	return datetime.strptime(date_str, '%a %b %d %H:%M:%S +0000 %Y')

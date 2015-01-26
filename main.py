@@ -13,7 +13,6 @@ import re
 import commands
 import os
 import sys
-from bs4 import BeautifulSoup
 from commands import *
 
 global tweeted
@@ -41,9 +40,9 @@ thread.start_new_thread(floodFilter,())
 
 def Net():
 	#Bot Configuration
-	nick = 'Iris'
-	host = "irc.tm"
-	channel = "#mootsinsuits"
+	nick = 'Iris_'
+	host = "irc.menthol.pw"
+	channel = "#menthol"
 	packets = ["NICK %s" % nick + "\r\n", "USER " + nick + " " + nick + " " + nick + " :" + nick + "\r\n", "JOIN %s" % channel + "\r\n"]
 	#Connect to IRC Server
 	s = socket.socket()
@@ -75,7 +74,14 @@ def Net():
 				chan = data.split(".j ")
 				chan = chan[1].strip()
 				send(s, "JOIN %s\r\n" % (chan))
-				
+			
+			if sData.startswith(".p "):
+				chan = data.split(".p ")
+				chan = chan[1].strip()
+				send(s, "PART %s\r\n" % (chan))			
+			if sData.startswith(".quit"):
+				send(s, "QUIT \r\n")
+				s.close()
 			if sData.startswith(".skype "):
 				name = data.split(".skype ")[1].strip()
 				print name
@@ -98,7 +104,7 @@ def Net():
 						cmds[args[0].replace("'", "")] = args[1].replace("'", "")
 						send(s, "PRIVMSG %s :Command %s added\r\n" % (channel, args[0]))
 				else:
-					send('PRIVMSG %s :How about you go suck on a big fat chode\r\n' % (channel))
+					send(s, 'PRIVMSG %s :How about you go suck on a big fat chode\r\n' % (channel))
 				
 			if cmds.has_key(sData.strip()):
 				eval(cmds[sData.strip()])#(s,channel)
@@ -226,7 +232,7 @@ def Net():
 					page = urllib.urlopen(site)
 					soup = BeautifulSoup(page)
 					title = soup.title.string
-					title = str(title).strip()
+					title = str(title).strip().encode('utf-8')
 					send(s, 'PRIVMSG %s :%s - %s\r\n' % (channel, site, title))
 				except Exception as e:
 					send(s, 'PRIVMSG ' + channel + ' :%s\r\n' % str(e))  
@@ -242,4 +248,14 @@ def Net():
 						os.system("sudo python rotate.py")
 						time.sleep(5)
 						os.system("sudo torify python main.py")
+			if sData.startswith("!reddit"):
+					reddit(s, channel)
+			if sData.startswith("!subreddit "):
+				try:
+					board = sData.split("!subreddit ")[1].strip()
+					reddit(s, channel, board)
+				except Exception as e:
+					send(s, "PRIVMSG %s: Please provide a valid sub-reddit\r\n" % (channel))
+			if sData.startswith("!nextpost"):
+				reddit_next(s, channel)
 Net()
