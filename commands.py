@@ -6,6 +6,8 @@ import dns.resolver
 import urllib2
 import threading
 import json
+import random
+import os
 from datetime import datetime
 from access import access_list
 from bs4 import BeautifulSoup
@@ -228,3 +230,113 @@ def NewTorIP():
 	with Controller.from_port(port = 9051) as controller:
 		controller.authenticate()
 		controller.signal(Signal.NEWNYM)
+		
+def quoteAdd(s, channel, user, quote):
+	quote = quote
+	user = user
+	if os.path.isfile(user + '.txt'):
+		f = open(user + '.txt', 'a+')
+		f.write('"' + quote + '"\n')
+		f.close()
+		f = open('quotes.txt', 'a+')
+		f.write(user + ' "' + quote + '"\n')
+		f.close()
+		send(s, "PRIVMSG %s :Quote was added!\r\n" % (channel))
+	else:
+		f = open(user + '.txt', 'w')
+		f.close()
+		f = open(user + '.txt', 'a+')
+		f.write('"' + quote + '"\n')
+		f.close()
+		f = open('quotes.txt', 'a+')
+		f.write(user + ' "' + quote + '"\n')
+		f.close()
+		send(s, "PRIVMSG %s :Quote was added!\r\n" % (channel))
+
+
+def newestquote(s, channel):
+	f = open('quotes.txt', 'r')
+	read = f.read()
+	split_text = read.split('\n')
+	join_text = ''.join(split_text)
+	if join_text == '':
+		s.send('PRIVMSG ' + channel + ' :Please enter a quote first!\r\n')
+	else:
+		s.send('PRIVMSG ' + channel + ' :' + split_text[-2] + '\r\n')
+def quotedel(s, channel, user, quote):
+	user = user
+	quote = quote
+	f = open(user + '.txt', 'r')
+	lines = f.readlines()
+	f.close()
+	f = open(user + '.txt', 'w')
+	for line in lines:
+		if line != '"'+quote+'"\n':
+			f.write(line)
+		else:
+			pass
+	f = open('quotes.txt', 'r')
+	lines = f.readlines()
+	f.close()
+	f = open('quotes.txt', 'w')
+	for line in lines:
+		if line != user +' "'+quote+'"\n':
+			f.write(line)
+		else:
+			pass
+	s.send('PRIVMSG ' + channel + ' :Quote deleted!\r\n')
+	f.close()
+
+def urbandic(s, channel, word):
+	word = word
+	url = ("http://www.urbandictionary.com/define.php?term="+word)
+	openurl = urllib2.urlopen(url)
+	soup = BeautifulSoup(openurl.read())
+	findtag = soup.find('div', {'class':'meaning'}).text
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, findtag.strip().encode('utf8')))
+
+def listquotes(s, channel):
+	f = open('Iris.txt', 'r')
+	read = f.read()
+	split = read.split('\n')
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, (random.choice(split))))
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, (random.choice(split))))
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, (random.choice(split))))
+	
+def topic(s, channel):
+	f = open('topic.txt', 'r')
+	read = f.read()
+	split = read.split('\n')
+	send(s, "PRIVMSG %s :%s\r\n" % (channel,split[0]))
+
+def topicadd(s, channel, topic):
+	f = open('topic.txt', 'w')
+	write = f.write('Iris - By niggerbread and Luga | '+topic)
+	f.close()
+
+def topicappend(s, channel, topic):
+	myFile = open('topic.txt', 'a+')
+	myFile.write(" | " + topic)
+	myFile.close()
+
+def quoterand(s, channel):
+	f = open('quotes.txt', 'r')
+	read = f.read()
+	split = read.split('\n')
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, (random.choice(split))))
+
+def quotes(s, channel, person):
+	theuser = person
+	if os.path.isfile(theuser + '.txt'):
+		f = open(theuser + '.txt', 'r')
+		read = f.read()
+		quoteslist = read.split('\n')
+		quoteslist = ', '.join(quoteslist)
+		quoteslist = quoteslist.rstrip(', ')
+		if quoteslist == '':
+			send(s, "PRIVMSG %s :Please add quotes for this user first!\r\n" % (channel))
+		else:
+			send(s, "PRIVMSG %s :%s\r\n" % (channel, quoteslist))
+	else:
+		send(s, "PRIVMSG %s :Please add quotes for this user first!\r\n" % (channel))
+

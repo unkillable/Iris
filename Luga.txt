@@ -1,0 +1,2 @@
+"pingus"
+"i cannot setup this if statement"

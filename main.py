@@ -40,9 +40,9 @@ thread.start_new_thread(floodFilter,())
 
 def Net():
 	#Bot Configuration
-	nick = 'Iris_'
-	host = "irc.menthol.pw"
-	channel = "#menthol"
+	nick = 'Iris'
+	host = "irc.tm"
+	channel = "#nigger"
 	packets = ["NICK %s" % nick + "\r\n", "USER " + nick + " " + nick + " " + nick + " :" + nick + "\r\n", "JOIN %s" % channel + "\r\n"]
 	#Connect to IRC Server
 	s = socket.socket()
@@ -256,6 +256,56 @@ def Net():
 					reddit(s, channel, board)
 				except Exception as e:
 					send(s, "PRIVMSG %s: Please provide a valid sub-reddit\r\n" % (channel))
+			
 			if sData.startswith("!nextpost"):
 				reddit_next(s, channel)
+				
+			if sData.startswith('.date'):
+				send(s, "PRIVMSG %s :%s\r\n" % (channel, str(time.strftime("%m/%d/%Y"))))
+
+			if sData.startswith('.quoteadd'):
+				try:
+					quote = sData.replace('.quoteadd ', '')
+					theuser, quote= quote.split(" ", 1)[0], quote.split(" ", 1)[1]
+					quoteAdd(s, channel, theuser, quote)
+				except:
+					pass
+			if sData.startswith('.newestquote'):
+				newestquote(s, channel)
+
+			if sData.startswith('.quotedel'):
+				if data.startswith(":Luga!") or data.startswith(":niggerbread!"):
+					try:
+						quote = sData.replace('.quotedel ', '')
+						theuser, quote= quote.split(" ", 1)[0], quote.split(" ", 1)[1]
+						quotedel(s, channel, theuser, quote)
+					except:
+						pass
+				else:
+					send(s, "PRIVMSG %s : Suck a fat one m8\r\n" % (channel))
+
+			if sData.startswith('.quoterand'):
+				quoterand(s, channel)
+
+			if sData.startswith('.quotes'):
+				if sData.startswith('.quotes '):
+					theuser = data.split('.quotes ')[1].strip()
+					quotes(s, channel, theuser)
+				else:
+					listquotes(s, channel)
+			if sData.startswith('.topic '):
+				thetopic = data.split('.topic ')[1].strip()
+				topicadd(s, channel, thetopic)
+			if sData.startswith('.topic'):
+				topic(s, channel)
+			if sData.startswith('.topicappend '):
+				mytopic = data.split('.topicappend ')[1].strip()
+				topicappend(s, channel, mytopic)
+
+			if sData.startswith('.urbandic'):
+				word = sData.split(".urbandic ")[1].strip()
+				urbandic(s, channel, word)
+
+			if sData.startswith('!news'):
+				news(s, channel)
 Net()
