@@ -14,7 +14,7 @@ import commands
 import os
 import sys
 from commands import *
-
+from auto_kick import akick_list
 global tweeted
 tweeted = 0
 global used
@@ -70,7 +70,9 @@ def Net():
 			channel = channel[0].strip()
 			print channel
 			sData = data.split(" PRIVMSG "+channel+" :")[1].strip()
-			
+			for user in akick_list:
+				if data.startswith(":"+user+"!"):
+					send(s, "KICK %s %s\r\n" % (channel, user))
 			if sData.startswith(".j "):
 				chan = data.split(".j ")
 				chan = chan[1].strip()
@@ -330,5 +332,26 @@ def Net():
 					send(s, "PRIVMSG %s :Something went wrong cycling posts\r\n" % (channel))
 			if sData.startswith('!notify '):
 				pass
+			if sData.startswith('.akick'):
+				try:
+					arg = sData.split('.akick ')[1]
+					if arg == 'list':
+						send(s, "PRIVMSG %s :Auto-kick list: %s \r\n" % (channel, str(akick_list)))
+					if arg.startswith('add'):
+						arg = arg.split('add ')[1].strip()
+						akick_list.append(arg.strip())
+						file = open("auto_kick.py", "w+")
+						file.write("akick_list = " + str(akick_list))
+						file.close()
+						send(s, "PRIVMSG %s :%s added to auto-kick list\r\n" % (channel, arg))
+					if arg.startswith('del'):
+						arg = arg.split('del ')[1].strip()
+						akick_list.remove(arg.strip())
+						file = open("auto_kick.py", "w+")
+						file.write("akick_list = " + str(akick_list))
+						file.close()
+						send(s, "PRIVMSG %s :%s deleted from auto-kick list\r\n" % (channel, arg))
+				except Exception as e:
+					send(s, "PRIVMSG %s :Please provide a valid name to add to the auto-kick list\r\n" % (channel))
 				#perhaps implement notify command
 Net()

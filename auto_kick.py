@@ -1,0 +1,1 @@
+akick_list = []
