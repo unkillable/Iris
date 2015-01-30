@@ -41,6 +41,15 @@ def help(s, name):
 	s.send('PRIVMSG ' + name + ' :.cf <site> - Resolves cloud flare domains\r\n')
 	s.send('PRIVMSG ' + name + ' :!ryan - check how long Ryan has been in prison\r\n')
 	s.send('PRIVMSG ' + name + ' :!news - get latest news headlines\r\n')
+	s.send('PRIVMSG ' + name + ' :.quotes <user> - List a users quotes\r\n')
+	s.send('PRIVMSG ' + name + ' :.quoteadd <user> <quote> - Add quote to user\r\n')
+	s.send('PRIVMSG ' + name + ' :.quotedel - Delete a quote. Only authorized users can do this.\r\n')
+	s.send('PRIVMSG ' + name + ' :.quoterand - Get three random quotes\r\n')
+	s.send('PRIVMSG ' + name + ' :!reddit - Load the latest reddit homepage and get the first post\r\n')
+	s.send('PRIVMSG ' + name + ' :!nextpost - Get next reddit post\r\n')
+	s.send('PRIVMSG ' + name + ' :!subreddit <topic> - Load the latest subreddit post\r\n')
+	s.send('PRIVMSG ' + name + ' :.urbandic <word> - Get definition of a word using urban dictionary\r\n')
+	s.send('PRIVMSG ' + name + ' :.topic - Get the bot topic\r\n')
 def send(s, msg):
 	s.send(msg)
 def sendTweet(s, name, message, channel):
@@ -340,3 +349,65 @@ def quotes(s, channel, person):
 	else:
 		send(s, "PRIVMSG %s :Please add quotes for this user first!\r\n" % (channel))
 
+def google(s, channel, request):	
+	try:
+		page = urllib2.Request("http://google.com/search?client=ubuntu&hs=Ty8&channel=fs&q="+request.replace(" ", "+").strip(), headers={'User-agent' : 'Mozilla/5.0'})
+		request = urllib2.urlopen(page)
+		request = BeautifulSoup(request.read())
+		title = request.find("h3", {"class" : "r"}).text
+		send(s, "PRIVMSG %s :%s\r\n" % (channel, title))
+		url = request.find("div", {"class" : "kv"}).cite.text
+		send(s, "PRIVMSG %s :%s\r\n" % (channel, url))
+		desc = request.find("span", {"class" : "st"}).text
+		send(s, "PRIVMSG %s :%s\r\n" % (channel, desc))
+	except Exception as e:
+		send(s, "PRIVMSG %s :Request throttled by shitty tor node\r\n" % (channel))
+		
+#4chan config	
+global fourchan_topics
+fourchan_topics = []
+global fourchan_names
+fourchan_names = []
+global fourchan_dates
+fourchan_dates = []
+global fourchan_messages
+fourchan_messages = []
+global fourchan_urls
+fourchan_urls = []
+global fCounter #Stores the number of which topic you are on
+fRounter = 0
+def fourchan(s, channel, request):
+	global fCounter
+	board = "/"+request+"/"
+	page = urllib2.Request("http://4chan.org"+ board, headers={'User-agent' : 'Mozilla/5.0'})
+	request = urllib2.urlopen(page)
+	request = BeautifulSoup(request.read())
+	details = request.find_all("div", {"class" : "thread"})
+	global fourchan_topics
+	fourchan_topics = details
+	print details
+	print "printed details"
+	name = details[0].find_all("span", {"class" : "name"})
+	print name
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, name[0].text))
+	date = details[0].find_all("span", {"class" : "dateTime"})
+	print date
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, date[0].text))
+	url = details[0].a['href']
+	print url
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, "http://boards.4chan.org"+board+url))
+	problem_text = details[0].find_all("blockquote",{"class":"postMessage"})
+	print problem_text
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, problem_text[0].text))
+	fCounter = 0
+	global current_board
+	current_board = board
+def fourchannext(s, channel):
+	global fourchan_topics
+	global current_board
+	global fCounter
+	fCounter += 1
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, fourchan_topics[fCounter].find_all("span", {"class" : "name"})[0].text))
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, fourchan_topics[fCounter].find("span", {"class" : "dateTime"}).text))
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, "http://boards.4chan.org"+current_board+fourchan_topics[fCounter].a['href']))
+	send(s, "PRIVMSG %s :%s\r\n" % (channel, fourchan_topics[fCounter].find("blockquote",{"class":"postMessage"}).text))

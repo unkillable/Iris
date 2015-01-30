@@ -41,8 +41,8 @@ thread.start_new_thread(floodFilter,())
 def Net():
 	#Bot Configuration
 	nick = 'Iris'
-	host = "irc.tm"
-	channel = "#nigger"
+	host = "irc.niggerbread.me"
+	channel = "#iffi"
 	packets = ["NICK %s" % nick + "\r\n", "USER " + nick + " " + nick + " " + nick + " :" + nick + "\r\n", "JOIN %s" % channel + "\r\n"]
 	#Connect to IRC Server
 	s = socket.socket()
@@ -58,6 +58,7 @@ def Net():
 		print data
 		if data.find(" 376 ") != -1:
 			send(s, "JOIN %s\r\n" % (channel))
+			send(s, "PRIVMSG nickserv identify isis4days\r\n")
 			
 		if data.startswith("PING "):
 			hash_key = data.split("PING :");
@@ -308,4 +309,26 @@ def Net():
 
 			if sData.startswith('!news'):
 				news(s, channel)
+			if sData.startswith('!google '):
+				request = sData.split("!google ")[1].strip()
+				google(s, channel, request)
+					#				except Exception as e:
+					#send(s, "PRIVMSG %s :Please provide a valid search term\r\n" % (channel))
+					#pass
+			if sData.startswith('!4chan '):
+				try:
+					board = sData.split("!4chan ")[1].strip()
+					print board
+					fourchan(s, channel, board)
+				except Exception as e:
+					print e
+					send(s, "PRIVMSG %s :Please provide a valid board name\r\n" % (channel))
+			if sData.startswith('!4channext'):
+				try:
+					fourchannext(s, channel)
+				except Exception as e:
+					send(s, "PRIVMSG %s :Something went wrong cycling posts\r\n" % (channel))
+			if sData.startswith('!notify '):
+				pass
+				#perhaps implement notify command
 Net()
