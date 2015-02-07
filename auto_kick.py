@@ -1,1 +1,1 @@
-akick_list = []
+akick_list = ['arthur']

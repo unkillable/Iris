@@ -52,6 +52,7 @@ def Net():
 	for packet in packets:
 		s.send(packet);
 	cmds = {}
+	topic = ""
 	while True:
 		data = s.recv(1024)
 		data = data.strip();
@@ -63,7 +64,22 @@ def Net():
 		if data.startswith("PING "):
 			hash_key = data.split("PING :");
 			send(s, "PONG %s\r\n" % (hash_key[1]))
-		
+		if data == "":
+			print "Ping timeout occured. Restarting"
+			s.close()
+			os.system("python main.py")
+		if " has changed the topic to:" in data:
+			#file = open("current_topic", "w+")
+			#file.write(data.split(" has changed the topic to:")[1].strip())
+			#file.close()
+			topic = data.split(" has changed the topic to:")[1].strip()
+		if "Iris " + channel + " :" in data:
+			print "Found topic"
+			global topic
+			#file = open("current_topic", "w+")
+			#file.write(data.split(" 332 Iris " + channel + " :")[1].strip())
+			#file.close()
+			topic = data.split(" 332 Iris " + channel + " :")[1].split("\n")[0].strip()
 		if "PRIVMSG " in data:
 			channel = data.split("PRIVMSG ")
 			channel = channel[1].split(" :")
@@ -354,4 +370,32 @@ def Net():
 				except Exception as e:
 					send(s, "PRIVMSG %s :Please provide a valid name to add to the auto-kick list\r\n" % (channel))
 				#perhaps implement notify command
+			if sData.startswith('!topic '):
+				try:
+					top = sData.split('!topic ')[1].strip()
+					send(s, "TOPIC %s :%s\r\n" % (channel, top))
+					topic = top
+				except Exception as e:
+					print e
+					send(s, "PRIVMSG %s :Please provide something to append to the topic\r\n" % (channel))
+			if sData.startswith('!topictrim '):
+				try:
+					query = " | " + sData.split("!topictrim ")[1].strip() 
+					topic = topic.replace(query, "")
+					send(s, "TOPIC %s :%s\r\n" % (channel, topic))
+				except Exception as e:
+					send(s, "PRIVMSG %s :Query not found\r\n" % [channel])
+					pass
+			if sData.startswith('!currenttopic'):
+				send(s, "PRIVMSG %s :%s\r\n" % (channel, topic))
+			if sData.startswith('!topicappend'):
+				try:
+					append = sData.split('!topicappend ')[1].strip()
+					print append
+					#topic = open("current_topic").read().strip().split("\n")[0]
+					send(s, "TOPIC %s :%s\r\n" % (channel, topic.strip()+" | "+append))
+					topic = topic + " | " + append
+				except Exception as e:
+					print e
+					send(s, "PRIVMSG %s :Please provide something to append to the topic\r\n" % (channel))
 Net()
