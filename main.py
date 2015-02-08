@@ -326,8 +326,11 @@ def Net():
 				topicappend(s, channel, mytopic)
 
 			if sData.startswith('.urbandic'):
-				word = sData.split(".urbandic ")[1].strip()
-				urbandic(s, channel, word)
+				try:
+					word = sData.split(".urbandic ")[1].strip()
+					urbandic(s, channel, word)
+				except Exception as e:
+					send(s, "PRIVMSG %s :Please provide a word you hooligan\r\n" % (channel))
 
 			if sData.startswith('!news'):
 				news(s, channel)
