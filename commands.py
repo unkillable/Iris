@@ -305,7 +305,7 @@ def urbandic(s, channel, word):
 		findtag = soup.find('div', {'class':'meaning'}).text
 		send(s, "PRIVMSG %s :%s\r\n" % (channel, findtag.strip().encode('utf8')))
 	except Exception as e:
-		send(s, "PRIVMSG %s :Could not find a definition for %s\r\n" % (channel, widd))
+		send(s, "PRIVMSG %s :Could not find a definition for %s\r\n" % (channel, word))
 		pass
 
 def listquotes(s, channel):
