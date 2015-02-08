@@ -15,6 +15,7 @@ import os
 import sys
 from commands import *
 from auto_kick import akick_list
+from todo import todo_list
 global tweeted
 tweeted = 0
 global used
@@ -74,12 +75,15 @@ def Net():
 			#file.close()
 			topic = data.split(" has changed the topic to:")[1].strip()
 		if "Iris " + channel + " :" in data:
-			print "Found topic"
-			global topic
-			#file = open("current_topic", "w+")
-			#file.write(data.split(" 332 Iris " + channel + " :")[1].strip())
-			#file.close()
-			topic = data.split(" 332 Iris " + channel + " :")[1].split("\n")[0].strip()
+			try:
+				print "Found topic"
+				global topic
+				#file = open("current_topic", "w+")
+				#file.write(data.split(" 332 Iris " + channel + " :")[1].strip())
+				#file.close()
+				topic = data.split(" 332 Iris " + channel + " :")[1].split("\n")[0].strip()
+			except Exception as e:
+				pass
 		if "PRIVMSG " in data:
 			channel = data.split("PRIVMSG ")
 			channel = channel[1].split(" :")
@@ -398,4 +402,28 @@ def Net():
 				except Exception as e:
 					print e
 					send(s, "PRIVMSG %s :Please provide something to append to the topic\r\n" % (channel))
+			if sData.startswith('.todo'):
+				try:
+					arg = sData.split('.todo ')[1]
+					if arg == 'list':
+						send(s, "PRIVMSG %s :Todo-list\r\n" % (channel))
+						for td in todo_list:
+							send(s, "PRIVMSG %s :%s \r\n" % (channel, str(td)))
+					if arg.startswith('add'):
+						arg = arg.split('add ')[1].strip()
+						todo_list.append(arg.strip())
+						file = open("todo.py", "w+")
+						file.write("todo_list = " + str(todo_list))
+						file.close()
+						send(s, "PRIVMSG %s :%s added to todo-list\r\n" % (channel, arg))
+					if arg.startswith('del'):
+						arg = arg.split('del ')[1].strip()
+						todo_list.remove(arg.strip())
+						file = open("todo.py", "w+")
+						file.write("todo_list = " + str(todo_list))
+						file.close()
+						send(s, "PRIVMSG %s :%s deleted from todo-list\r\n" % (channel, arg))
+				except Exception as e:
+					send(s, "PRIVMSG %s :Please provide a valid subject to append to the todo-list\r\n" % (channel))
+					
 Net()
