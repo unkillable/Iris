@@ -300,9 +300,13 @@ def urbandic(s, channel, word):
 	word = word
 	url = ("http://www.urbandictionary.com/define.php?term="+word)
 	openurl = urllib2.urlopen(url)
-	soup = BeautifulSoup(openurl.read())
-	findtag = soup.find('div', {'class':'meaning'}).text
-	send(s, "PRIVMSG %s :%s\r\n" % (channel, findtag.strip().encode('utf8')))
+	try:
+		soup = BeautifulSoup(openurl.read())
+		findtag = soup.find('div', {'class':'meaning'}).text
+		send(s, "PRIVMSG %s :%s\r\n" % (channel, findtag.strip().encode('utf8')))
+	except Exception as e:
+		send(s, "PRIVMSG %s :Could not find a definition for %s\r\n" % (channel, widd))
+		pass
 
 def listquotes(s, channel):
 	f = open('Iris.txt', 'r')
